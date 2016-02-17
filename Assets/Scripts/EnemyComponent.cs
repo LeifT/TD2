@@ -21,13 +21,13 @@ public class EnemyComponent : ISelectableUnit {
     private void OnEnable() {
         _isSelected = true;
         IsSelected = false;
-        GameManagerComponent.Instance.GetSelections.AddSelectable(gameObject);
+        GameManagerComponent.GetSelections.AddSelectable(gameObject);
     }
 
     private void OnDisable() {
-        if (GameManagerComponent.Instance != null) {
-            GameManagerComponent.Instance.GetSelections.RemoveSelectable(gameObject);
-        }
+        //if (GameManagerComponent.Instance != null) {
+        //    GameManagerComponent.GetSelections.RemoveSelectable(gameObject);
+        //}
         
         EnemyManager.Instance.GetEnemies().Remove(gameObject);
     }

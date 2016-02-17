@@ -6,11 +6,12 @@ using UnityEngine;
 public class Selections {
     private static readonly List<ISelectableUnit> EmptyGroup = new EmptyUnitGroup();
     private List<ISelectableUnit> _selected;
-    private IDictionary<int, List<ISelectableUnit>> _groups; 
+    private readonly IDictionary<int, List<ISelectableUnit>> _groups;
+    private readonly List<ISelectableUnit> _selectableUnits;
 
     public Selections() {
         _selected = EmptyGroup;
-        SelectableUnits = new List<ISelectableUnit>();
+        _selectableUnits = new List<ISelectableUnit>();
         _groups = new Dictionary<int, List<ISelectableUnit>>();
     }
 
@@ -18,16 +19,19 @@ public class Selections {
         get { return _selected;}
     }
 
-    public List<ISelectableUnit> SelectableUnits { get; set; }
+    public List<ISelectableUnit> SelectableUnits {
+        get { return _selectableUnits;}
+    }
+    
 
     public void AddSelectable(GameObject unit) {
-        SelectableUnits.Add(unit.GetComponent<ISelectableUnit>());
+        _selectableUnits.Add(unit.GetComponent<ISelectableUnit>());
     }
 
     public void RemoveSelectable(GameObject unit) {
         var temp = unit.GetComponent<ISelectableUnit>();
         temp.IsSelected = false;
-        SelectableUnits.Remove(temp);
+        _selectableUnits.Remove(temp);
         Selected.Remove(temp);
 
         if (_groups.Count > 0) {
@@ -57,7 +61,7 @@ public class Selections {
 
     public void SelectUnitsBetween(Vector3 start, Vector3 end, bool append) {
         start = Camera.main.WorldToScreenPoint(start);
-        var selected = SelectableUnits.Where(u => PositionWhitinVectors(u.transform.localPosition, start, end));
+        var selected = _selectableUnits.Where(u => PositionWhitinVectors(u.transform.localPosition, start, end));
         Select(selected.ToList(), append);
     }
 
@@ -158,11 +162,11 @@ public class Selections {
     }
 
     public ISelectableUnit Select(int index, bool toggle) {
-        if (index < 0 || index >= SelectableUnits.Count) {
+        if (index < 0 || index >= _selectableUnits.Count) {
             return null;
         }
 
-        var unit = SelectableUnits[index];
+        var unit = _selectableUnits[index];
 
         if (toggle) {
             DeselectAll();

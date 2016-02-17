@@ -1,11 +1,15 @@
 ﻿using UnityEngine;
 
 // ReSharper disable once CheckNamespace
-public class GameManagerComponent : Singleton<GameManagerComponent> {
-    private Selections _selections;
+public static class GameManagerComponent  {
+    private static readonly Selections Selections;
 
-    public Selections GetSelections {
-        get { return _selections ?? (_selections = new Selections()); }
+    static GameManagerComponent() {
+        Selections = new Selections();
+    }
+
+    public static Selections GetSelections {
+        get { return Selections; }
     }
 
 

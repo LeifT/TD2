@@ -9,6 +9,12 @@ public class InputReciever : MonoBehaviour {
     // ReSharper disable once UnusedMember.Local
     private void Awake() {
         _selectionComponent = GetComponentInChildren<SelectionComponent>();
+
+        if (_selectionComponent == null)
+        {
+            // TODO: Change text
+            Debug.LogWarning("Missing SelectionRectangleComponent, this is required by the input receiver to handle unit selection.");
+        }
     }
 
     // ReSharper disable once UnusedMember.Local
@@ -17,13 +23,17 @@ public class InputReciever : MonoBehaviour {
     }
 
     private void Selection() {
-        var selectAppend = Input.GetKey(KeyCode.LeftShift);
+        // Abort if _selectionComponent is missig
+        if (_selectionComponent == null) {
+            return;
+        }
 
-        //if (EventSystem.current.IsPointerOverGameObject()) return;
+        var selectAppend = Input.GetKey(KeyCode.LeftShift);
 
         if (Input.GetMouseButtonDown(0)) {
             _lastSelectedDownPosition = Input.mousePosition;
 
+            // Screen to worldpos
             Plane plane = new Plane(Vector3.up, Vector3.zero);
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             float distance;
@@ -32,6 +42,7 @@ public class InputReciever : MonoBehaviour {
                 _lastSelectedDownPosition =  ray.GetPoint(distance);
             }
 
+            // Start select
             _selectionComponent.StartSelect();
             return;
         }
@@ -47,10 +58,10 @@ public class InputReciever : MonoBehaviour {
             var mouseUpPonition = Input.mousePosition;
 
             if (_selectionComponent.HasSelection(_lastSelectedDownPosition, mouseUpPonition)) {
-                GameManagerComponent.Instance.GetSelections.SelectUnitsBetween(_lastSelectedDownPosition, mouseUpPonition, selectAppend);
+                GameManagerComponent.GetSelections.SelectUnitsBetween(_lastSelectedDownPosition, mouseUpPonition, selectAppend);
             }
             else {
-                GameManagerComponent.Instance.GetSelections.SelectUnit(_lastSelectedDownPosition, selectAppend);
+                GameManagerComponent.GetSelections.SelectUnit(_lastSelectedDownPosition, selectAppend);
             }
 
             _selectionComponent.EndSelect();
@@ -64,11 +75,11 @@ public class InputReciever : MonoBehaviour {
             var code = KeyCode.Alpha1 + index;
             if (Input.GetKeyDown(code)) { 
                 if (assignGroup) {
-                    GameManagerComponent.Instance.GetSelections.AssignGroup(index);
+                    GameManagerComponent.GetSelections.AssignGroup(index);
                 } else if (mergeGroup) {
-                    GameManagerComponent.Instance.GetSelections.MergeGroup(index);
+                    GameManagerComponent.GetSelections.MergeGroup(index);
                 } else {
-                    GameManagerComponent.Instance.GetSelections.SelectGroup(index);
+                    GameManagerComponent.GetSelections.SelectGroup(index);
                 }
             }
         }
