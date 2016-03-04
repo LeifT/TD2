@@ -24,24 +24,23 @@ public class Selections {
     }
     
 
-    public void AddSelectable(GameObject unit) {
-        _selectableUnits.Add(unit.GetComponent<ISelectableUnit>());
+    public void AddSelectable(ISelectableUnit unit) {
+        _selectableUnits.Add(unit);
     }
 
-    public void RemoveSelectable(GameObject unit) {
-        var temp = unit.GetComponent<ISelectableUnit>();
-        temp.IsSelected = false;
-        _selectableUnits.Remove(temp);
-        Selected.Remove(temp);
+    public void RemoveSelectable(ISelectableUnit unit) {
+        unit.IsSelected = false;
+        _selectableUnits.Remove(unit);
+        Selected.Remove(unit);
 
         if (_groups.Count > 0) {
             foreach (var group in _groups) {
-                group.Value.Remove(temp);
+                group.Value.Remove(unit);
             }
         }
     }
 
-    private bool PositionWhitinVectors(Vector3 position, Vector3 start, Vector3 end) {
+    private bool PositionWithinVectors(Vector3 position, Vector3 start, Vector3 end) {
         var screenPoint = Camera.main.WorldToScreenPoint(position);
 
         if (screenPoint.x < Mathf.Min(start.x, end.x)) {
@@ -61,7 +60,7 @@ public class Selections {
 
     public void SelectUnitsBetween(Vector3 start, Vector3 end, bool append) {
         start = Camera.main.WorldToScreenPoint(start);
-        var selected = _selectableUnits.Where(u => PositionWhitinVectors(u.transform.localPosition, start, end));
+        var selected = _selectableUnits.Where(u => PositionWithinVectors(u.transform.localPosition, start, end));
         Select(selected.ToList(), append);
     }
 

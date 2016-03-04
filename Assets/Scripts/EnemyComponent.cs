@@ -1,8 +1,10 @@
 ﻿using UnityEngine;
+
 // ReSharper disable UnusedMember.Local
 // ReSharper disable once CheckNamespace
 public class EnemyComponent : ISelectableUnit {
     private bool _isSelected;
+    private bool? _selectPending;
     public GameObject SelectionVisual;
 
     public override bool IsSelected {
@@ -18,17 +20,27 @@ public class EnemyComponent : ISelectableUnit {
         }
     }
 
+    public override bool IsSelectable { get; set; }
+    //public Vector3 transform { get; set; }
+
     private void OnEnable() {
         _isSelected = true;
         IsSelected = false;
-        GameManagerComponent.GetSelections.AddSelectable(gameObject);
+        IsSelectable = true;
+        GameManagerComponent.RegisterUnit(gameObject);
     }
 
     private void OnDisable() {
-        //if (GameManagerComponent.Instance != null) {
-        //    GameManagerComponent.GetSelections.RemoveSelectable(gameObject);
-        //}
-        
         EnemyManager.Instance.GetEnemies().Remove(gameObject);
+    }
+
+    public override void MarkSelectPending(bool pending) {
+        if (_selectPending != pending) {
+            _selectPending = pending;
+
+            if (SelectionVisual != null) {
+                SelectionVisual.SetActive(pending);
+            }
+        }
     }
 }

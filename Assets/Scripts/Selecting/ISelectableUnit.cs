@@ -3,12 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public abstract class ISelectableUnit : MonoBehaviour {
-    private List<string> list = new List<string>();
-
-    public void a() {
-       
-        list.IndexOf("a");
-    }
-
     public abstract bool IsSelected { get; set; }
+
+    public abstract bool IsSelectable { get; set; }
+
+    public abstract void MarkSelectPending(bool pending);
 }

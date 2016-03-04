@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using UnityEngine.EventSystems;
 
 // ReSharper disable once CheckNamespace
 public class InputReciever : MonoBehaviour {
