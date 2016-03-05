@@ -5,6 +5,7 @@
 public class GridVisuals : MonoBehaviour {
     //private DateTime? _nextRefresh;
     public bool DrawAlways;
+    public bool DrawObstacles;
     public int EditorRefreshDelay = 100;
 
     public Color BoundsColor = Color.gray;
@@ -73,11 +74,13 @@ public class GridVisuals : MonoBehaviour {
             return;
         }
 
-        Gizmos.color = ObstacleColor;
+        if (DrawObstacles) {
+            Gizmos.color = ObstacleColor;
 
-        foreach (var cell in grid.Grid) {
-            if (cell.Blocked) {
-                Gizmos.DrawCube(cell.Position, new Vector3(step, 0.5f, step));
+            foreach (var cell in grid.Grid) {
+                if (cell.Blocked) {
+                    Gizmos.DrawCube(cell.Position, new Vector3(step, 0.5f, step));
+                }
             }
         }
     }

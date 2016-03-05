@@ -28,14 +28,14 @@ public class ControlGroupsEditor : Editor {
 
         _unitList.drawHeaderCallback = rect => { EditorGUI.LabelField(rect, "Groups"); };
 
-        _unitList.onSelectCallback = l => {
-            var prefab =
-                l.serializedProperty.GetArrayElementAtIndex(l.index).FindPropertyRelative("Prefab").objectReferenceValue
-                    as GameObject;
-            if (prefab) {
-                EditorGUIUtility.PingObject(prefab.gameObject);
-            }
-        };
+        //_unitList.onSelectCallback = l => {
+        //    var prefab =
+        //        l.serializedProperty.GetArrayElementAtIndex(l.index).FindPropertyRelative("Prefab").objectReferenceValue
+        //            as GameObject;
+        //    if (prefab) {
+        //        EditorGUIUtility.PingObject(prefab.gameObject);
+        //    }
+        //};
 
         _unitList.onCanRemoveCallback = l => { return l.count > 1; };
         _unitList.onRemoveCallback = l => {

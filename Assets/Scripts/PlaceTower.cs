@@ -4,6 +4,7 @@ using UnityEngine.EventSystems;
 // ReSharper disable once CheckNamespace
 public class PlaceTower : MonoBehaviour {
     private GridManager _gridManager;
+    public GameObject Tower;
 
     // ReSharper disable once UnusedMember.Local
     private void Start() {
@@ -24,7 +25,7 @@ public class PlaceTower : MonoBehaviour {
             if (playerPlane.Raycast(ray, out hitdist)) {
                 var hitNode = _gridManager.GridComponent.NodeFromWorldPoint(ray.GetPoint(hitdist));
 
-                if (hitNode == null) {
+                if (hitNode == null || hitNode.Blocked) {
                     return;
                 }
 
@@ -63,7 +64,12 @@ public class PlaceTower : MonoBehaviour {
                 }
                 else {
                     hitNode.Blocked = false;
+                    return;
                 }
+
+                
+                Instantiate(Tower, hitNode.Position, Quaternion.identity);
+             
             }
         }
     }

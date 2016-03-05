@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.EventSystems;
 
 // ReSharper disable once CheckNamespace
 public class InputReciever : MonoBehaviour {
@@ -30,6 +31,10 @@ public class InputReciever : MonoBehaviour {
         var selectAppend = Input.GetKey(KeyCode.LeftShift);
 
         if (Input.GetMouseButtonDown(0)) {
+            if (EventSystem.current.IsPointerOverGameObject()) {
+                return;
+            }
+
             _lastSelectedDownPosition = Input.mousePosition;
 
             // Screen to worldpos
@@ -47,6 +52,10 @@ public class InputReciever : MonoBehaviour {
         }
 
         if (Input.GetMouseButton(0)) {
+            if (EventSystem.current.IsPointerOverGameObject())
+            {
+                return;
+            }
             if (_selectionComponent.HasSelection(_lastSelectedDownPosition, Input.mousePosition)) {
                 // TODO: Implement tentativ selection
             }
@@ -54,13 +63,17 @@ public class InputReciever : MonoBehaviour {
         }
 
         if (Input.GetMouseButtonUp(0)) {
+            if (EventSystem.current.IsPointerOverGameObject())
+            {
+                return;
+            }
             var mouseUpPonition = Input.mousePosition;
 
             if (_selectionComponent.HasSelection(_lastSelectedDownPosition, mouseUpPonition)) {
-                GameManagerComponent.GetSelections.SelectUnitsBetween(_lastSelectedDownPosition, mouseUpPonition, selectAppend);
+                GameManagerComponent.Selection.SelectUnitsBetween(_lastSelectedDownPosition, mouseUpPonition, selectAppend);
             }
             else {
-                GameManagerComponent.GetSelections.SelectUnit(_lastSelectedDownPosition, selectAppend);
+                GameManagerComponent.Selection.SelectUnit(_lastSelectedDownPosition, selectAppend);
             }
 
             _selectionComponent.EndSelect();
@@ -74,11 +87,11 @@ public class InputReciever : MonoBehaviour {
             var code = KeyCode.Alpha1 + index;
             if (Input.GetKeyDown(code)) { 
                 if (assignGroup) {
-                    GameManagerComponent.GetSelections.AssignGroup(index);
+                    GameManagerComponent.Selection.AssignGroup(index);
                 } else if (mergeGroup) {
-                    GameManagerComponent.GetSelections.MergeGroup(index);
+                    GameManagerComponent.Selection.MergeGroup(index);
                 } else {
-                    GameManagerComponent.GetSelections.SelectGroup(index);
+                    GameManagerComponent.Selection.SelectGroup(index);
                 }
             }
         }
