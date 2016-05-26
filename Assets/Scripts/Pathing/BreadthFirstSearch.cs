@@ -1,12 +1,11 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 // ReSharper disable once CheckNamespace
 public class BreadthFirstSearch {
     public bool FindPath(GridComponent grid, Cell startPos, Cell targetPos) {
         var startNode = startPos;
-        bool pathFound = false;
+        var pathFound = false;
 
         if (startNode.Blocked) {
             return false;
@@ -46,6 +45,54 @@ public class BreadthFirstSearch {
         }
 
         return pathFound;
+    }
+
+    public bool PathExistOnBlock(GridComponent grid, Cell startPos, Cell targetPos, Vector3 blockPos) {
+        var hitNode = grid.NodeFromWorldPoint(blockPos);
+
+        if (hitNode == null || hitNode.Blocked) {
+            return false;
+        }
+
+        // Check is enemy is inside the node
+        for (var i = 0; i < EnemyManager.Instance.GetEnemies().Count; i++) {
+            var enemyNode = grid.NodeFromWorldPoint(EnemyManager.Instance.GetEnemies()[i].transform.position);
+
+            if (enemyNode == hitNode || enemyNode.Parent == hitNode) {
+                return false;
+            }
+        }
+
+        hitNode.Blocked = true;
+
+        // Check if all enemies can get to the end if node is blocked
+        if (FindPath(grid, startPos, targetPos)) {
+            for (var i = 0; i < EnemyManager.Instance.GetEnemies().Count; i++) {
+                var enemyNode = grid.NodeFromWorldPoint(EnemyManager.Instance.GetEnemies()[i].transform.position);
+
+                var temp = enemyNode.Parent;
+
+                while (temp != null) {
+                    temp = temp.Parent;
+
+                    if (temp == hitNode) {
+                        hitNode.Blocked = false;
+                        return false;
+                    }
+                }
+            }
+
+
+            hitNode.Parent = null;
+            hitNode.GCost = 0;
+            hitNode.HCost = 0;
+        }
+        else {
+            hitNode.Blocked = false;
+            return false;
+        }
+
+        return true;
     }
 
     private int GetDistance(Cell lhs, Cell rhs) {

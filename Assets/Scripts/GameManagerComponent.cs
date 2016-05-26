@@ -15,24 +15,19 @@ public static class GameManagerComponent {
 
     //private static readonly Selections _selections;
 
-    public static Selections Selection { get; private set; }
+    public static Selections Selection { get; set; }
 
-    public static IMessageBus MessageBus
-    {
-        get
-        {
-            if (_messageBus == null)
-            {
-                throw new MissingComponentException("No message bus has been initialized, please ensure that you have a Game Services Initializer component in the game world.\nThis may also be caused by script files having been recompiled while the scene is running, if so restart the scene.");
+    public static IMessageBus MessageBus {
+        get {
+            if (_messageBus == null) {
+                throw new MissingComponentException(
+                    "No message bus has been initialized, please ensure that you have a Game Services Initializer component in the game world.\nThis may also be caused by script files having been recompiled while the scene is running, if so restart the scene.");
             }
 
             return _messageBus;
         }
 
-        set
-        {
-            _messageBus = value;
-        }
+        set { _messageBus = value; }
     }
 
     public static IUnitFacade GetUnitFacade(GameObject unitGameObject, bool create = true) {
@@ -47,7 +42,6 @@ public static class GameManagerComponent {
             unit.Initialize(unitGameObject);
             _units.Add(unitGameObject, unit);
         }
-
         return unit;
     }
 

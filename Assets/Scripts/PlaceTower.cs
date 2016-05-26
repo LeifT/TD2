@@ -23,53 +23,10 @@ public class PlaceTower : MonoBehaviour {
             float hitdist;
 
             if (playerPlane.Raycast(ray, out hitdist)) {
-                var hitNode = _gridManager.GridComponent.NodeFromWorldPoint(ray.GetPoint(hitdist));
 
-                if (hitNode == null || hitNode.Blocked) {
-                    return;
+                if (_gridManager.FindPathBlocked(ray.GetPoint(hitdist))) {
+                    Instantiate(Tower, _gridManager.GridComponent.NodeFromWorldPoint(ray.GetPoint(hitdist)).Position, Quaternion.identity);
                 }
-
-                // Check is enemy is inside the node
-                for (var i = 0; i < EnemyManager.Instance.GetEnemies().Count; i++) {
-                    var enemyNode = _gridManager.GridComponent.NodeFromWorldPoint(EnemyManager.Instance.GetEnemies()[i].transform.position);
-
-                    if (enemyNode == hitNode || enemyNode.Parent == hitNode) {
-                        return;
-                    }
-                }
-
-                hitNode.Blocked = true;
-
-                // Check if all enemies can get to the end if node is blocked
-                if (_gridManager.FindPath()) {
-                    for (var i = 0; i < EnemyManager.Instance.GetEnemies().Count; i++) {
-                        var enemyNode = _gridManager.GridComponent.NodeFromWorldPoint(EnemyManager.Instance.GetEnemies()[i].transform.position);
-
-                        var temp = enemyNode.Parent;
-
-                        while (temp != null) {
-                            temp = temp.Parent;
-
-                            if (temp == hitNode) {
-                                hitNode.Blocked = false;
-                                return;
-                            }
-                        }
-                    }
-
-                    
-                    hitNode.Parent = null;
-                    hitNode.GCost = 0;
-                    hitNode.HCost = 0;
-                }
-                else {
-                    hitNode.Blocked = false;
-                    return;
-                }
-
-                
-                Instantiate(Tower, hitNode.Position, Quaternion.identity);
-             
             }
         }
     }

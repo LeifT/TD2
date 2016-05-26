@@ -2,10 +2,11 @@
 
 // ReSharper disable UnusedMember.Local
 // ReSharper disable once CheckNamespace
-public class UnitComponent : MonoBehaviour, IUnitProperties {
+public class UnitComponent : MonoBehaviour, IUnitProperties{
     private bool _isSelected;
     private bool? _selectPending;
     public GameObject SelectionVisual;
+
 
     public bool IsSelected {
         get { return _isSelected; }
@@ -20,13 +21,20 @@ public class UnitComponent : MonoBehaviour, IUnitProperties {
         }
     }
 
-    public bool IsSelectable { get; set; }
+    [SerializeField]
+    private bool _isSelectable;
+
+    [SerializeField]
+    private int _priority;
+
+
+
+    public bool IsSelectable { get {return _isSelectable;} set { _isSelectable = value; } }
     //public Vector3 transform { get; set; }
 
     private void OnEnable() {
         _isSelected = true;
         IsSelected = false;
-        IsSelectable = true;
         GameManagerComponent.RegisterUnit(gameObject);
         //EnemyManager.Instance.
     }
@@ -50,4 +58,7 @@ public class UnitComponent : MonoBehaviour, IUnitProperties {
             }
         }
     }
+
+    public int Group { get; set; }
+    public int Priority { get {return _priority;} set { _priority = value; } }
 }

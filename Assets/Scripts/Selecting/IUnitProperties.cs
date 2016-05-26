@@ -3,6 +3,9 @@ using System.Collections;
 
 public interface IUnitProperties  {
     bool IsSelected { get; set; }
-    bool IsSelectable { get; }
+    bool IsSelectable { get; set; }
     void MarkSelectPending(bool pending);
+
+    int Group { get; set; }
+    int Priority { get; set; }
 }

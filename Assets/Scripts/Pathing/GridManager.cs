@@ -19,4 +19,10 @@ public class GridManager : MonoBehaviour {
     public bool FindPath() {
         return _bfs.FindPath(GridComponent, GridComponent.NodeFromWorldPoint(StartPosition.position), GridComponent.NodeFromWorldPoint(TargetPosition.position));
     }
+
+    public bool FindPathBlocked(Vector3 pos) {
+        return _bfs.PathExistOnBlock(GridComponent, GridComponent.NodeFromWorldPoint(StartPosition.position), GridComponent.NodeFromWorldPoint(TargetPosition.position), pos);
+    }
+
+    
 }

@@ -14,6 +14,6 @@ public class TestSub : MonoBehaviour, IMessage<UnitsSelectedMessage> {
 	}
 
     public void Handle(UnitsSelectedMessage message) {
-        Debug.Log(message.SelectedUnits.Count);
+        //Debug.Log(message.SelectedUnits.Count);
     }
 }

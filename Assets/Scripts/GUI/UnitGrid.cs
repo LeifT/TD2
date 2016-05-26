@@ -18,8 +18,6 @@ public class UnitGrid : MonoBehaviour, IMessage<UnitsSelectedMessage>, IMessage<
 	}
 
     public void Handle(UnitsSelectedMessage message) {
-        
-
         foreach (var slot in _slots) {
             Destroy(slot.Value.gameObject);
         }

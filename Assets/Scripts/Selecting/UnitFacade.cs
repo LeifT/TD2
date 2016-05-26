@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 // ReSharper disable once CheckNamespace
 public class UnitFacade : IUnitFacade {
@@ -9,7 +10,7 @@ public class UnitFacade : IUnitFacade {
         set { _props.IsSelected = value; }
     }
 
-    public bool IsSelectable { get { return _props.IsSelectable; } }
+    public bool IsSelectable { get { return _props.IsSelectable; } set { _props.IsSelectable = value; } }
     public Transform Transform { get; private set; }
     public Collider Collider { get; private set; }
     public GameObject GameObject { get; private set; }
@@ -19,13 +20,20 @@ public class UnitFacade : IUnitFacade {
     public void MarkSelectPending(bool pending) {
         _props.MarkSelectPending(pending);
     }
-    
+
+    public int Group { get; set; }
+    public int Priority { get; set; }
+
     public void Initialize(GameObject unitObject) {
         _props = unitObject.As<IUnitProperties>(false, true);
 
         GameObject = unitObject;
         Transform = unitObject.transform;
         Collider = unitObject.GetComponent<Collider>();
+
+        Priority = _props.Priority;
+        Group = _props.Group;
+
         IsSelected = false;
     }
 }

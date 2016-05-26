@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -54,8 +55,24 @@ public class Selections {
 
     public void SelectUnitsBetween(Vector3 start, Vector3 end, bool append) {
         start = Camera.main.WorldToScreenPoint(start);
-        var selected = SelectableUnits.Where(u => PositionWithinVectors(u.Transform.localPosition, start, end));
-        Select(selected.ToList(), append);
+        
+       
+        List<IUnitFacade> units = new List<IUnitFacade>();
+        int maxPrio = int.MinValue;
+
+        foreach (var selectableUnit in SelectableUnits) {
+            if (PositionWithinVectors(selectableUnit.Transform.localPosition, start, end)) {
+
+                if (selectableUnit.Priority >= maxPrio) {
+                    maxPrio = selectableUnit.Priority;
+                    units.Add(selectableUnit);
+                }
+            }
+        }
+
+        //var selected = SelectableUnits.Where(u => u.Priority >= maxPrio);
+
+        Select(units.Where(u => u.Priority >= maxPrio).ToList(), append);
     }
 
     public void Select(IUnitFacade unit, bool append) {
@@ -75,8 +92,6 @@ public class Selections {
         var unit = SelectableUnits[index];
 
         DeselectAll();
-
-        
 
         Selected = new List<IUnitFacade> { unit };
         PostUnitSeletedMessage(Selected);
