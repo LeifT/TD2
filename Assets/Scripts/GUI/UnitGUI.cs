@@ -9,7 +9,14 @@ public class UnitGUI : MonoBehaviour, IPointerClickHandler
     public IUnitFacade UnitFacade;
 
     public void OnPointerClick(PointerEventData eventData) {
-        GameManagerComponent.Selection.Select(UnitFacade, false);
+        if (Input.GetKey(KeyCode.LeftShift)) {
+            GameManagerComponent.Selection.ToggleSelected(UnitFacade, true);
+        }
+        else {
+            GameManagerComponent.Selection.Select(UnitFacade, false);
+        }
+
+        
     }
 }
 

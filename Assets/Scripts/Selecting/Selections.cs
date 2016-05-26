@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Assets.Scripts.Message;
 using UnityEngine;
 
 // ReSharper disable once CheckNamespace
 public class Selections {
     private static readonly List<IUnitFacade> EmptyGroup = new EmptyUnitGroup();
     private readonly IDictionary<int, List<IUnitFacade>> _groups;
+    private IUnitFacade _selectedUnitType;
 
     public Selections() {
         Selected = EmptyGroup;
@@ -32,7 +34,7 @@ public class Selections {
             }
         }
 
-        GameManagerComponent.MessageBus.Post(new UnitOnDisableMessage(unitFacade));
+        GameManagerComponent.MessageBus.Post(new UnitRemovedMessage(unitFacade));
     }
 
     private bool PositionWithinVectors(Vector3 position, Vector3 start, Vector3 end) {
@@ -73,17 +75,19 @@ public class Selections {
         //var selected = SelectableUnits.Where(u => u.Priority >= maxPrio);
 
         Select(units.Where(u => u.Priority >= maxPrio).ToList(), append);
+
+        if (units.Count > 0) {
+            PostUnitSelectTypeMessage(units[0]);
+        }
     }
 
     public void Select(IUnitFacade unit, bool append) {
-        
         DeselectAll();
         unit.IsSelected = true;
         Selected = new List<IUnitFacade> { unit };
         PostUnitSeletedMessage(Selected);
-
     }
-         
+    
     public void Select(int index, bool append) {
         if (index < 0 || index >= SelectableUnits.Count) {
             return;
@@ -105,11 +109,13 @@ public class Selections {
         //return unit;
     }
 
+    // Get unit from screen position
     public void SelectUnit(Vector3 screenPos, bool append) {
         screenPos = Camera.main.WorldToScreenPoint(screenPos);
 
         IUnitFacade unit = null;
 
+        // Get collider from screen position
         var collider = Camera.main.GetColliderAtPosition(screenPos, 1 << 8);
 
         if (collider != null) {
@@ -122,6 +128,8 @@ public class Selections {
         else if (!append) {
             DeselectAll();
         }
+
+        PostUnitSeletedMessage(Selected);
     }
 
     public void ToggleSelected(IUnitFacade unitFacade, bool append) {
@@ -129,7 +137,7 @@ public class Selections {
             DeselectAll();
             unitFacade.IsSelected = true;
             Selected = new List<IUnitFacade> {unitFacade};
-            PostUnitSeletedMessage(Selected);
+            //PostUnitSeletedMessage(Selected);
             return;
         }
 
@@ -140,9 +148,10 @@ public class Selections {
         }
         else {
             Selected.Remove(unitFacade);
+            PostUnitRemovedMessage(unitFacade);
         }
 
-        PostUnitSeletedMessage(Selected);
+       // PostUnitSeletedMessage(Selected);
     }
 
     public void Select(List<IUnitFacade> units, bool append) {
@@ -276,6 +285,15 @@ public class Selections {
 
     private void PostUnitSeletedMessage(List<IUnitFacade> units) {
         GameManagerComponent.MessageBus.Post(new UnitsSelectedMessage(units));
+    }
+
+    private void PostUnitSelectTypeMessage(IUnitFacade unit) {
+        Debug.Log("Post");
+        GameManagerComponent.MessageBus.Post(new UnitTypeSelectionMessage(unit));
+    }
+
+    private void PostUnitRemovedMessage(IUnitFacade unit) {
+        GameManagerComponent.MessageBus.Post(new UnitRemovedMessage(unit));
     }
 
     private class EmptyUnitGroup : List<IUnitFacade> {}

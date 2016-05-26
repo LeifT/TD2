@@ -32,6 +32,7 @@ public class SelectionComponent : MonoBehaviour {
         if ((Mathf.Abs(startScreen.x - endScreen.x) < StaltDeltaThreshold) || (Mathf.Abs(startScreen.y - endScreen.y) < StaltDeltaThreshold)) {
             return false;
         }
+
         DrawSelectionRect(startScreen, endScreen);
         return true;
     }

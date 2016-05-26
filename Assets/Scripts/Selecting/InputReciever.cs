@@ -5,15 +5,14 @@ using UnityEngine.EventSystems;
 public class InputReciever : MonoBehaviour {
     private Vector3 _lastSelectedDownPosition;
     private SelectionComponent _selectionComponent;
-
     // ReSharper disable once UnusedMember.Local
     private void Awake() {
         _selectionComponent = GetComponentInChildren<SelectionComponent>();
 
-        if (_selectionComponent == null)
-        {
+        if (_selectionComponent == null) {
             // TODO: Change text
-            Debug.LogWarning("Missing SelectionRectangleComponent, this is required by the input receiver to handle unit selection.");
+            Debug.LogWarning(
+                "Missing SelectionRectangleComponent, this is required by the input receiver to handle unit selection.");
         }
     }
 
@@ -30,6 +29,7 @@ public class InputReciever : MonoBehaviour {
 
         var selectAppend = Input.GetKey(KeyCode.LeftShift);
 
+        // On left mouse button down
         if (Input.GetMouseButtonDown(0)) {
             if (EventSystem.current.IsPointerOverGameObject()) {
                 return;
@@ -38,35 +38,37 @@ public class InputReciever : MonoBehaviour {
             _lastSelectedDownPosition = Input.mousePosition;
 
             // Screen to worldpos
-            Plane plane = new Plane(Vector3.up, Vector3.zero);
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            var plane = new Plane(Vector3.up, Vector3.zero);
+            var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             float distance;
 
             if (plane.Raycast(ray, out distance)) {
-                _lastSelectedDownPosition =  ray.GetPoint(distance);
+                _lastSelectedDownPosition = ray.GetPoint(distance);
             }
 
-            // Start select
+            // Start selecting
             _selectionComponent.StartSelect();
             return;
         }
 
+        // When  left mouse button is down
         if (Input.GetMouseButton(0)) {
-            if (EventSystem.current.IsPointerOverGameObject())
-            {
+            if (EventSystem.current.IsPointerOverGameObject()) {
                 return;
             }
+
             if (_selectionComponent.HasSelection(_lastSelectedDownPosition, Input.mousePosition)) {
                 // TODO: Implement tentativ selection
             }
             return;
         }
 
+        // On left mouse button up
         if (Input.GetMouseButtonUp(0)) {
-            if (EventSystem.current.IsPointerOverGameObject())
-            {
+            if (EventSystem.current.IsPointerOverGameObject()) {
                 return;
             }
+
             var mouseUpPonition = Input.mousePosition;
 
             if (_selectionComponent.HasSelection(_lastSelectedDownPosition, mouseUpPonition)) {
@@ -76,6 +78,7 @@ public class InputReciever : MonoBehaviour {
                 GameManagerComponent.Selection.SelectUnit(_lastSelectedDownPosition, selectAppend);
             }
 
+            // End selecting
             _selectionComponent.EndSelect();
             return;
         }
@@ -83,14 +86,16 @@ public class InputReciever : MonoBehaviour {
         var assignGroup = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.LeftAlt);
         var mergeGroup = Input.GetKey(KeyCode.LeftShift);
 
-        for (int index = 0; index < 5; index++) {
+        for (var index = 0; index < 5; index++) {
             var code = KeyCode.Alpha1 + index;
-            if (Input.GetKeyDown(code)) { 
+            if (Input.GetKeyDown(code)) {
                 if (assignGroup) {
                     GameManagerComponent.Selection.AssignGroup(index);
-                } else if (mergeGroup) {
+                }
+                else if (mergeGroup) {
                     GameManagerComponent.Selection.MergeGroup(index);
-                } else {
+                }
+                else {
                     GameManagerComponent.Selection.SelectGroup(index);
                 }
             }

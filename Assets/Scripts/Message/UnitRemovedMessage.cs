@@ -1,8 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class UnitOnDisableMessage {
-    public UnitOnDisableMessage(IUnitFacade unit) {
+public class UnitRemovedMessage {
+    public UnitRemovedMessage(IUnitFacade unit) {
         Unit = unit;
     }
 

@@ -1,52 +1,59 @@
 ﻿using System.Collections.Generic;
+using Assets.Scripts.Message;
 using UnityEngine;
-using UnityEngine.UI;
 
-public class SpellGrid : MonoBehaviour, IMessage<UnitsSelectedMessage>, IMessage<UnitOnDisableMessage> {
-    private readonly List<SpellGUI> _spells = new List<SpellGUI>();
+public class SpellGrid : MonoBehaviour, IMessage<UnitsSelectedMessage>, IMessage<UnitRemovedMessage>,
+    IMessage<UnitTypeSelectionMessage> {
+    private readonly List<GameObject> _abilities = new List<GameObject>();
+    //private readonly List<SpellGUI> _spells = new List<SpellGUI>();
     public SpellGUI Spell;
 
-    public void Handle(UnitOnDisableMessage message) {}
+    public void Handle(UnitRemovedMessage message) {}
 
-    public void Handle(UnitsSelectedMessage message) {
-        if (message.SelectedUnits.Count > 0) {
-            var spellComponent = message.SelectedUnits[0].GameObject.GetComponent<SpellComponent>();
+    public void Handle(UnitsSelectedMessage message) {}
 
-            if (spellComponent == null) {
-                return;
-            }
-
-
-            for (var i = 0; i < 9; i++) {
-                if (spellComponent.spells[i].Name != null) {
-                    _spells[i].GetComponent<Image>().sprite = spellComponent.spells[i].Icon;
-                    _spells[i].Spell = spellComponent.spells[i];
-                }
-            }
-        }
-        else {
-            Debug.Log("Empty");
-        }
+    public void Handle(UnitTypeSelectionMessage message) {
+        SetSpells(message.Unit.GameObject.GetComponent<SpellComponent>().spells);
     }
 
     private void OnEnable() {
         GameManagerComponent.MessageBus.Subscribe<UnitsSelectedMessage>(this);
-        GameManagerComponent.MessageBus.Subscribe<UnitOnDisableMessage>(this);
+        GameManagerComponent.MessageBus.Subscribe<UnitRemovedMessage>(this);
+        GameManagerComponent.MessageBus.Subscribe<UnitTypeSelectionMessage>(this);
     }
 
     private void OnDisable() {
         GameManagerComponent.MessageBus.Unsubscribe<UnitsSelectedMessage>(this);
-        GameManagerComponent.MessageBus.Unsubscribe<UnitOnDisableMessage>(this);
+        GameManagerComponent.MessageBus.Unsubscribe<UnitRemovedMessage>(this);
+        GameManagerComponent.MessageBus.Unsubscribe<UnitTypeSelectionMessage>(this);
     }
 
     // Use this for initialization
     private void Start() {
-        for (var i = 0; i < 9; i++) {
-            _spells.Add(Instantiate(Spell));
-            _spells[i].transform.SetParent(transform, false);
+        foreach (Transform child in transform) {
+            _abilities.Add(child.gameObject);
         }
     }
 
     // Update is called once per frame
     private void Update() {}
+
+    private void RemoveSpells() {
+        foreach (var ability in _abilities) {
+            foreach (Transform child in ability.transform) {
+                Destroy(child.gameObject);
+            }
+        }
+    }
+
+    private void SetSpells(ISpell[] spells) {
+        RemoveSpells();
+
+        for (var i = 0; i < spells.Length; i++) {
+            if (spells[i] != null) {
+                var temp = Instantiate(Spell);
+                temp.transform.SetParent(_abilities[i].transform, false);
+            }
+        }
+    }
 }

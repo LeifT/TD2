@@ -1,20 +1,21 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using System.Collections.Generic;
 
 // ReSharper disable once CheckNamespace
-public class UnitGrid : MonoBehaviour, IMessage<UnitsSelectedMessage>, IMessage<UnitOnDisableMessage> {
+public class UnitGrid : MonoBehaviour, IMessage<UnitsSelectedMessage>, IMessage<UnitRemovedMessage> {
     public GameObject UnitsPanel;
     public UnitGUI Unit;
     private readonly Dictionary<IUnitFacade, GameObject> _slots = new Dictionary<IUnitFacade, GameObject>();
 
 	void OnEnable () {
         GameManagerComponent.MessageBus.Subscribe<UnitsSelectedMessage>(this);
-        GameManagerComponent.MessageBus.Subscribe<UnitOnDisableMessage>(this);
+        GameManagerComponent.MessageBus.Subscribe<UnitRemovedMessage>(this);
     }
 	
 	void OnDisable () {
 	    GameManagerComponent.MessageBus.Unsubscribe<UnitsSelectedMessage>(this);
-	    GameManagerComponent.MessageBus.Unsubscribe<UnitOnDisableMessage>(this);
+	    GameManagerComponent.MessageBus.Unsubscribe<UnitRemovedMessage>(this);
 	}
 
     public void Handle(UnitsSelectedMessage message) {
@@ -32,7 +33,7 @@ public class UnitGrid : MonoBehaviour, IMessage<UnitsSelectedMessage>, IMessage<
         }
     }
 
-    public void Handle(UnitOnDisableMessage message) {
+    public void Handle(UnitRemovedMessage message) {
         GameObject unit;
 
         if (_slots.TryGetValue(message.Unit, out unit)) {
