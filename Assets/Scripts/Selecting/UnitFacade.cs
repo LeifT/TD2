@@ -23,6 +23,7 @@ public class UnitFacade : IUnitFacade {
 
     public int Group { get; set; }
     public int Priority { get; set; }
+    public Sprite Icon { get; set; }
 
     public void Initialize(GameObject unitObject) {
         _props = unitObject.As<IUnitProperties>(false, true);
@@ -33,6 +34,7 @@ public class UnitFacade : IUnitFacade {
 
         Priority = _props.Priority;
         Group = _props.Group;
+        Icon = _props.Icon;
 
         IsSelected = false;
     }

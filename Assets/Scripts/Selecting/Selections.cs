@@ -60,13 +60,19 @@ public class Selections {
         
        
         List<IUnitFacade> units = new List<IUnitFacade>();
-        int maxPrio = int.MinValue;
+        int maxGroup = int.MinValue;
 
         foreach (var selectableUnit in SelectableUnits) {
             if (PositionWithinVectors(selectableUnit.Transform.localPosition, start, end)) {
 
-                if (selectableUnit.Priority >= maxPrio) {
-                    maxPrio = selectableUnit.Priority;
+                if (selectableUnit.Group >= maxGroup) {
+
+                    if (selectableUnit.Group > maxGroup) {
+                        maxGroup = selectableUnit.Group;
+                        units.Clear();
+                    }
+
+                    
                     units.Add(selectableUnit);
                 }
             }
@@ -74,7 +80,7 @@ public class Selections {
 
         //var selected = SelectableUnits.Where(u => u.Priority >= maxPrio);
 
-        Select(units.Where(u => u.Priority >= maxPrio).ToList(), append);
+        Select(units, append);
 
         if (units.Count > 0) {
             PostUnitSelectTypeMessage(units[0]);
@@ -288,7 +294,6 @@ public class Selections {
     }
 
     private void PostUnitSelectTypeMessage(IUnitFacade unit) {
-        Debug.Log("Post");
         GameManagerComponent.MessageBus.Post(new UnitTypeSelectionMessage(unit));
     }
 

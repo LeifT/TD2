@@ -8,4 +8,6 @@ public interface IUnitProperties  {
 
     int Group { get; set; }
     int Priority { get; set; }
+
+    Sprite Icon { get; set; }
 }

@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class SpellGrid : MonoBehaviour, IMessage<UnitsSelectedMessage>, IMessage<UnitRemovedMessage>,
     IMessage<UnitTypeSelectionMessage> {
-    private readonly List<GameObject> _abilities = new List<GameObject>();
+    private readonly List<GameObject> _slots = new List<GameObject>();
     //private readonly List<SpellGUI> _spells = new List<SpellGUI>();
     public SpellGUI Spell;
 
@@ -13,7 +13,12 @@ public class SpellGrid : MonoBehaviour, IMessage<UnitsSelectedMessage>, IMessage
     public void Handle(UnitsSelectedMessage message) {}
 
     public void Handle(UnitTypeSelectionMessage message) {
-        SetSpells(message.Unit.GameObject.GetComponent<SpellComponent>().spells);
+
+        var spellcomponent = message.Unit.GameObject.GetComponent<SpellComponent>();
+
+        if (spellcomponent != null) {
+            SetSpells(spellcomponent.spells);
+        }
     }
 
     private void OnEnable() {
@@ -31,15 +36,12 @@ public class SpellGrid : MonoBehaviour, IMessage<UnitsSelectedMessage>, IMessage
     // Use this for initialization
     private void Start() {
         foreach (Transform child in transform) {
-            _abilities.Add(child.gameObject);
+            _slots.Add(child.gameObject);
         }
     }
 
-    // Update is called once per frame
-    private void Update() {}
-
-    private void RemoveSpells() {
-        foreach (var ability in _abilities) {
+    private void ClearSlots() {
+        foreach (var ability in _slots) {
             foreach (Transform child in ability.transform) {
                 Destroy(child.gameObject);
             }
@@ -47,12 +49,12 @@ public class SpellGrid : MonoBehaviour, IMessage<UnitsSelectedMessage>, IMessage
     }
 
     private void SetSpells(ISpell[] spells) {
-        RemoveSpells();
+        ClearSlots();
 
         for (var i = 0; i < spells.Length; i++) {
             if (spells[i] != null) {
                 var temp = Instantiate(Spell);
-                temp.transform.SetParent(_abilities[i].transform, false);
+                temp.transform.SetParent(_slots[i].transform, false);
             }
         }
     }

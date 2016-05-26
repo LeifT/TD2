@@ -6,8 +6,7 @@ public class UnitComponent : MonoBehaviour, IUnitProperties{
     private bool _isSelected;
     private bool? _selectPending;
     public GameObject SelectionVisual;
-
-
+    
     public bool IsSelected {
         get { return _isSelected; }
         set {
@@ -27,6 +26,11 @@ public class UnitComponent : MonoBehaviour, IUnitProperties{
     [SerializeField]
     private int _priority;
 
+    [SerializeField]
+    private int _group;
+
+    [SerializeField]
+    private Sprite _sprite;
 
 
     public bool IsSelectable { get {return _isSelectable;} set { _isSelectable = value; } }
@@ -59,6 +63,7 @@ public class UnitComponent : MonoBehaviour, IUnitProperties{
         }
     }
 
-    public int Group { get; set; }
+    public int Group { get { return _group; } set { _group = value; } }
     public int Priority { get {return _priority;} set { _priority = value; } }
+    public Sprite Icon { get {return _sprite;} set { _sprite = value; } }
 }
