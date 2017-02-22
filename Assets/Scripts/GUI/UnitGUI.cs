@@ -11,7 +11,7 @@ public class UnitGUI : MonoBehaviour, IPointerClickHandler {
             GameManagerComponent.Selection.ToggleSelected(UnitFacade);
         }
         else {
-            GameManagerComponent.Selection.Select(UnitFacade, false);
+            GameManagerComponent.Selection.Select(UnitFacade);
         }
     }
 }

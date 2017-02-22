@@ -5,7 +5,7 @@ using UnityEngine;
 public class Selections {
     private readonly IDictionary<int, List<IUnitFacade>> _groups;
     private readonly IDictionary<int, List<IUnitFacade>> _types;
-    
+
     public Selections() {
         Selected = new List<IUnitFacade>();
         SelectableUnits = new List<IUnitFacade>();
@@ -21,20 +21,19 @@ public class Selections {
     }
 
     public void RemoveSelectable(IUnitFacade unitFacade) {
-        unitFacade.IsSelected = false;
         SelectableUnits.Remove(unitFacade);
 
-        if (Selected.Contains(unitFacade)) {
-            GameManagerComponent.MessageBus.Post(new UnitRemovedMessage(unitFacade));
-        }
-
-        RemoveUnit(unitFacade);
-
-        // Remove the unit from every group
+        // Remove the unit from assigned groups
         if (_groups.Count > 0) {
             foreach (var group in _groups) {
                 group.Value.Remove(unitFacade);
             }
+        }
+
+        if (Selected.Contains(unitFacade)) {
+            var removed = new List<IUnitFacade>();
+            RemoveUnit(unitFacade, removed);
+            PostSelectionChangedMessage(Selected, new List<IUnitFacade>(), removed);
         }
     }
 
@@ -58,9 +57,9 @@ public class Selections {
 
     public void SelectUnitsBetween(Vector3 start, Vector3 end, bool append) {
         start = Camera.main.WorldToScreenPoint(start);
-       
-        List<IUnitFacade> units = new List<IUnitFacade>();
-        int maxGroup = int.MinValue;
+
+        var units = new List<IUnitFacade>();
+        var maxGroup = int.MinValue;
 
         foreach (var selectableUnit in SelectableUnits) {
             if (PositionWithinVectors(selectableUnit.Transform.localPosition, start, end)) {
@@ -69,7 +68,7 @@ public class Selections {
                         maxGroup = selectableUnit.Group;
                         units.Clear();
                     }
-                    
+
                     units.Add(selectableUnit);
                 }
             }
@@ -83,41 +82,36 @@ public class Selections {
         //}
     }
 
-    public void Select(IUnitFacade unit, bool append) {
-        List<IUnitFacade> added = new List<IUnitFacade>();
-        List<IUnitFacade> removed = new List<IUnitFacade>();
+    public void Select(IUnitFacade unit) {
+        var added = new List<IUnitFacade>();
+        var removed = new List<IUnitFacade>();
 
+        //// Remove every other unit in the selection
         if (Selected.Contains(unit)) {
-            for (int i = Selected.Count - 1; i >= 0; i--) {
-                if (Selected[i].Equals(unit)) {
-                    continue;
+            for (var i = Selected.Count - 1; i >= 0; i--) {
+                if (!Selected[i].Equals(unit)) {
+                    RemoveUnit(Selected[i], removed);
                 }
-
-                removed.Add(Selected[i]);
-                RemoveUnit(Selected[i]);
             }
         } else {
-            for (int i = Selected.Count - 1; i >= 0; i--) {
-                Selected[i].IsSelected = false;
-                removed.Add(Selected[i]);
-                Selected.RemoveAt(i);
-            }
-
-            _types.Clear();
-
-            added.Add(unit);
-            AddUnit(unit);
-            unit.IsSelected = true;
+            ClearSelection(removed);
+            AddUnit(unit, added);
         }
 
         PostSelectionChangedMessage(Selected, added, removed);
-        //PostUnitSeletedMessage(Selected);
     }
-    
+
+    private void ClearSelection(List<IUnitFacade> removed) {
+        for (var i = Selected.Count - 1; i >= 0; i--) {
+            RemoveUnit(Selected[i], removed);
+        }
+    }
+
     // Get unit from screen position
     public void SelectUnit(Vector3 screenPos, bool append) {
-        List<IUnitFacade> added = new List<IUnitFacade>();
-        List<IUnitFacade> removed = new List<IUnitFacade>();
+        var added = new List<IUnitFacade>();
+        var removed = new List<IUnitFacade>();
+
         screenPos = Camera.main.WorldToScreenPoint(screenPos);
 
         // Get collider from screen position
@@ -126,61 +120,39 @@ public class Selections {
         if (collider != null) {
             var unit = collider.GetUnitFacade();
 
-            if (unit != null && unit.IsSelectable) {
+            if ((unit != null) && unit.IsSelectable) {
                 if (append) {
                     ToggleSelected(unit);
-                    return;
+                } else {
+                    Select(unit);
                 }
-
-                for (int i = Selected.Count - 1; i >= 0; i--)
-                {
-                    Selected[i].IsSelected = false;
-                    removed.Add(Selected[i]);
-                    Selected.RemoveAt(i);
-                }
-
-                _types.Clear();
-
-                added.Add(unit);
-                AddUnit(unit);
-                unit.IsSelected = true;
-                
+                return;
             }
         } else if (!append) {
-            for (int i = Selected.Count - 1; i >= 0; i--)
-            {
-                Selected[i].IsSelected = false;
-                removed.Add(Selected[i]);
-                Selected.RemoveAt(i);
-            }
-
-            _types.Clear();
+            ClearSelection(removed);
         }
 
         PostSelectionChangedMessage(Selected, added, removed);
     }
 
     public void ToggleSelected(IUnitFacade unitFacade) {
-        List<IUnitFacade> added = new List<IUnitFacade>();
-        List<IUnitFacade> removed = new List<IUnitFacade>();
-
-        unitFacade.IsSelected = !unitFacade.IsSelected;
+        var added = new List<IUnitFacade>();
+        var removed = new List<IUnitFacade>();
 
         if (unitFacade.IsSelected) {
-            AddUnit(unitFacade);
-            added.Add(unitFacade);
-        }
-        else {
-            removed.Add(unitFacade);
-            RemoveUnit(unitFacade);
+            RemoveUnit(unitFacade, removed);
+        } else {
+            AddUnit(unitFacade, added);
         }
 
         PostSelectionChangedMessage(Selected, added, removed);
     }
 
-    public void AddUnit(IUnitFacade unit) {
+    public void AddUnit(IUnitFacade unit, List<IUnitFacade> list) {
+        unit.IsSelected = true;
+        list.Add(unit);
         Selected.Add(unit);
-        
+
         if (!_types.ContainsKey(unit.Priority)) {
             _types.Add(unit.Priority, new List<IUnitFacade>());
         }
@@ -188,7 +160,9 @@ public class Selections {
         _types[unit.Priority].Add(unit);
     }
 
-    public void RemoveUnit(IUnitFacade unit) {
+    public void RemoveUnit(IUnitFacade unit, List<IUnitFacade> list) {
+        unit.IsSelected = false;
+        list.Add(unit);
         Selected.Remove(unit);
 
         if (!_types.ContainsKey(unit.Priority)) {
@@ -199,28 +173,20 @@ public class Selections {
     }
 
     public void Select(List<IUnitFacade> units, bool append) {
-        List<IUnitFacade> added = new List<IUnitFacade>();
-        List<IUnitFacade> removed = new List<IUnitFacade>();
+        var added = new List<IUnitFacade>();
+        var removed = new List<IUnitFacade>();
 
         foreach (var selectableUnit in units) {
-            if (Selected.Contains(selectableUnit)) {
-                continue;
+            if (!Selected.Contains(selectableUnit)) {
+                AddUnit(selectableUnit, added);
             }
-
-            selectableUnit.IsSelected = true;
-            AddUnit(selectableUnit);
-            added.Add(selectableUnit);
         }
-        
-        if (!append) {
-            for (int i = Selected.Count - 1; i >= 0; i--) {
-                if (units.Contains(Selected[i])) {
-                    continue;
-                }
 
-                Selected[i].IsSelected = false;
-                removed.Add(Selected[i]);
-                RemoveUnit(Selected[i]);
+        if (!append) {
+            for (var i = Selected.Count - 1; i >= 0; i--) {
+                if (!units.Contains(Selected[i])) {
+                    RemoveUnit(Selected[i], removed);
+                }
             }
         }
 
@@ -231,8 +197,7 @@ public class Selections {
         if (Selected.Count > 0) {
             if (!_groups.ContainsKey(groupIndex)) {
                 _groups.Add(groupIndex, new List<IUnitFacade>());
-            }
-            else {
+            } else {
                 _groups[groupIndex].Clear();
             }
 
@@ -247,20 +212,18 @@ public class Selections {
 
         if (_groups.TryGetValue(groupIndex, out group)) {
             foreach (var selectableUnit in Selected) {
-                if (group.Contains(selectableUnit)) {
-                    continue;
+                if (!group.Contains(selectableUnit)) {
+                    group.Add(selectableUnit);
                 }
-                group.Add(selectableUnit);
             }
-        }
-        else {
+        } else {
             AssignGroup(groupIndex);
         }
     }
 
     public void SelectGroup(int groupIndex) {
-        List<IUnitFacade> added = new List<IUnitFacade>();
-        List<IUnitFacade> removed = new List<IUnitFacade>();
+        var added = new List<IUnitFacade>();
+        var removed = new List<IUnitFacade>();
 
         List<IUnitFacade> group;
         if (_groups.TryGetValue(groupIndex, out group)) {
@@ -270,41 +233,29 @@ public class Selections {
             }
 
             // Deselct the selected units that are not in this group
-            for (int i = Selected.Count - 1; i >= 0; i--) {
-                if (group.Contains(Selected[i]))
-                {
-                    continue;
+            for (var i = Selected.Count - 1; i >= 0; i--) {
+                if (!group.Contains(Selected[i])) {
+                    RemoveUnit(Selected[i], removed);
                 }
-
-                Selected[i].IsSelected = false;
-                removed.Add(Selected[i]);
-                RemoveUnit(Selected[i]);
             }
-            
+
             // Select the remaining units from the group
             foreach (var selectableUnit in group) {
-                if (Selected.Contains(selectableUnit)) {
-                    continue;
+                if (!Selected.Contains(selectableUnit)) {
+                    AddUnit(selectableUnit, added);
                 }
-
-                selectableUnit.IsSelected = true;
-                AddUnit(selectableUnit);
-                added.Add(selectableUnit);
             }
-            
+
             PostSelectionChangedMessage(Selected, added, removed);
         }
     }
 
-    public IUnitFacade GetHighest()
-    {
+    public IUnitFacade GetHighest() {
         var max = int.MinValue;
         var index = 0;
 
-        for (int i = 0; i < Selected.Count; i++)
-        {
-            if (Selected[i].Priority > max)
-            {
+        for (var i = 0; i < Selected.Count; i++) {
+            if (Selected[i].Priority > max) {
                 max = Selected[i].Priority;
                 index = i;
             }
@@ -313,7 +264,7 @@ public class Selections {
         return Selected[index];
     }
 
-    private void PostSelectionChangedMessage(List<IUnitFacade> units, List<IUnitFacade> added , List<IUnitFacade> removed) {
+    private void PostSelectionChangedMessage(List<IUnitFacade> units, List<IUnitFacade> added, List<IUnitFacade> removed) {
         GameManagerComponent.MessageBus.Post(new SelectionChangedMessage(units, added, removed));
     }
 }
