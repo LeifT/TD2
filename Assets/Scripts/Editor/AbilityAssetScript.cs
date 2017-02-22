@@ -11,17 +11,13 @@ public class AbilityAssetScript : Editor
     static void RegenerateAbilityAsset()//(Type abilityType)
     {
         string path = Application.dataPath + "/Scripts/Abilities/";
-
         string[] abilitiesFull = Directory.GetFiles(path);
 
-
         int x = 0;
-        foreach (string str in abilitiesFull)
-        {
+        foreach (string str in abilitiesFull) {
             string filename = str.Substring(str.LastIndexOf("/") + 1);
 
-            if (filename.EndsWith(".cs"))
-            {
+            if (filename.EndsWith(".cs")) {
                 string meh = filename.Remove(filename.Length - 3);
 
                 var abilityType = meh;
@@ -32,10 +28,6 @@ public class AbilityAssetScript : Editor
                 Debug.Log(meh);
                 x++;
             }
-
         }
-
-
-
     }
 }

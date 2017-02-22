@@ -18,20 +18,17 @@ public class PlaceTower : MonoBehaviour {
 
     // ReSharper disable once UnusedMember.Local
     private void Update() {
-        if (Input.GetKeyDown(KeyCode.Alpha1))
-        {
+        if (Input.GetKeyDown(KeyCode.Alpha1)) {
             Debug.Log("Selected tower 1");
             SelectedTower = Tower1;
         }
 
-        if (Input.GetKeyDown(KeyCode.Alpha2))
-        {
+        if (Input.GetKeyDown(KeyCode.Alpha2)) {
             Debug.Log("Selected tower 2");
             SelectedTower = Tower2;
         }
 
-        if (Input.GetKeyDown(KeyCode.Alpha3))
-        {
+        if (Input.GetKeyDown(KeyCode.Alpha3)) {
             Debug.Log("Selected tower 3");
             SelectedTower = Tower3;
         }
@@ -41,13 +38,10 @@ public class PlaceTower : MonoBehaviour {
                 Place(SelectedTower);
             }
         }
-
-        
     }
 
     private void Place(GameObject tower) {
-        if (EventSystem.current.IsPointerOverGameObject())
-        {
+        if (EventSystem.current.IsPointerOverGameObject()) {
             return;
         }
 
@@ -55,11 +49,8 @@ public class PlaceTower : MonoBehaviour {
         var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         float hitdist;
 
-        if (playerPlane.Raycast(ray, out hitdist))
-        {
-
-            if (_gridManager.FindPathBlocked(ray.GetPoint(hitdist)))
-            {
+        if (playerPlane.Raycast(ray, out hitdist)) {
+            if (_gridManager.FindPathBlocked(ray.GetPoint(hitdist))) {
                 Instantiate(tower, _gridManager.GridComponent.NodeFromWorldPoint(ray.GetPoint(hitdist)).Position, Quaternion.identity);
             }
         }

@@ -16,6 +16,7 @@ public class EnemyManager : MonoBehaviour {
 
     public void Remove(GameObject enemie) {
         ObjectPool.Instance.PoolObject(enemie);
+        _enemies.Remove(enemie);
     }
 
     // ReSharper disable once UnusedMember.Local
@@ -37,10 +38,10 @@ public class EnemyManager : MonoBehaviour {
     }
 
     public void SpawnEnemie() {
-        var temp = ObjectPool.Instance.GetObjectForType("Enemie", false);
-        temp.transform.position = Start.position;
-        temp.GetComponent<Movement>().Target = End.position;
-        temp.GetComponent<Movement>().Cell = _gridManager.GridComponent.NodeFromWorldPoint(temp.transform.position);
-        _enemies.Add(temp);
+        var enemy = ObjectPool.Instance.GetObjectForType("Enemie", false);
+        enemy.transform.position = Start.position;
+        enemy.GetComponent<Movement>().Target = End.position;
+        enemy.GetComponent<Movement>().Cell = _gridManager.GridComponent.NodeFromWorldPoint(enemy.transform.position);
+        _enemies.Add(enemy);
     }
 }

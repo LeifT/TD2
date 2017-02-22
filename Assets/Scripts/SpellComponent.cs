@@ -12,8 +12,6 @@ public class SpellComponent : MonoBehaviour {
             if (spells[i] == null) {
                 spells[i] = ScriptableObject.CreateInstance("AbilityEmpty") as ISpell;
             }
-
         }
-
     }
 }

@@ -1,19 +1,13 @@
 ﻿using UnityEngine;
-using System.Collections;
 using UnityEngine.UI;
 
 public class HealthBar : MonoBehaviour {
-
     public Color MaxColor = Color.green;
     public Color MinColor = Color.red;
     private float minValue = 0.0f;
     private float maxValue = 1.0f;
-
-    //public Image image;
-
     private Image _image;
-
-	// Use this for initialization
+    
 	void Start () {
 	    if (_image == null) {
 	        _image = gameObject.AddComponent<Image>();
@@ -21,11 +15,11 @@ public class HealthBar : MonoBehaviour {
 	        _image.color = MaxColor;
 	    }
 
-	    transform.root.GetComponent<UnitHealth>().OnHealthDecresed += Aoeu;
+	    transform.root.GetComponent<UnitHealth>().OnHealthChanged += UpdateHealthBar;
 	}
 
-    public void Aoeu(int current, int max) {
-        SetHealthVisual((float)current/(float)max);
+    public void UpdateHealthBar(int current, int max) {
+        SetHealthVisual((float)current/max);
     }
  
     public void SetHealthVisual(float healthNormalized) {

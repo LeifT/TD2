@@ -10,15 +10,20 @@ public class InputReciever : MonoBehaviour {
         _selectionComponent = GetComponentInChildren<SelectionComponent>();
 
         if (_selectionComponent == null) {
-            // TODO: Change text
-            Debug.LogWarning(
-                "Missing SelectionRectangleComponent, this is required by the input receiver to handle unit selection.");
+            Debug.LogWarning("SelectionComponent is missing");
         }
     }
 
     // ReSharper disable once UnusedMember.Local
     private void Update() {
         Selection();
+
+        if (Input.GetKeyDown(KeyCode.Tab)) {
+            Debug.Log("Pressed TAB");
+            return;
+        }
+
+        ManageGroups();
     }
 
     private void Selection() {
@@ -27,17 +32,19 @@ public class InputReciever : MonoBehaviour {
             return;
         }
 
-        var selectAppend = Input.GetKey(KeyCode.LeftShift);
+        StartSelecting();
+        WhileSelecting();
+        EndSelecting();
+    }
 
+    private void StartSelecting() {
         // On left mouse button down
         if (Input.GetMouseButtonDown(0)) {
             if (EventSystem.current.IsPointerOverGameObject()) {
                 return;
             }
 
-            _lastSelectedDownPosition = Input.mousePosition;
-
-            // Screen to worldpos
+            // Screen to world positon
             var plane = new Plane(Vector3.up, Vector3.zero);
             var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             float distance;
@@ -48,11 +55,12 @@ public class InputReciever : MonoBehaviour {
 
             // Start selecting
             _selectionComponent.StartSelect();
-            return;
         }
+    }
 
-        // When  left mouse button is down
+    private void WhileSelecting() {
         if (Input.GetMouseButton(0)) {
+            // If mouse is over gui element
             if (EventSystem.current.IsPointerOverGameObject()) {
                 return;
             }
@@ -60,29 +68,32 @@ public class InputReciever : MonoBehaviour {
             if (_selectionComponent.HasSelection(_lastSelectedDownPosition, Input.mousePosition)) {
                 // TODO: Implement tentativ selection
             }
-            return;
         }
+    }
 
-        // On left mouse button up
+    private void EndSelecting() {
         if (Input.GetMouseButtonUp(0)) {
+            // If mouse is over gui element
             if (EventSystem.current.IsPointerOverGameObject()) {
                 return;
             }
 
-            var mouseUpPonition = Input.mousePosition;
+            var mouseUpPosition = Input.mousePosition;
+            var appendSelection = Input.GetKey(KeyCode.LeftShift);
 
-            if (_selectionComponent.HasSelection(_lastSelectedDownPosition, mouseUpPonition)) {
-                GameManagerComponent.Selection.SelectUnitsBetween(_lastSelectedDownPosition, mouseUpPonition, selectAppend);
-            }
-            else {
-                GameManagerComponent.Selection.SelectUnit(_lastSelectedDownPosition, selectAppend);
+            if (_selectionComponent.HasSelection(_lastSelectedDownPosition, mouseUpPosition)) {
+                GameManagerComponent.Selection.SelectUnitsBetween(_lastSelectedDownPosition, mouseUpPosition,
+                    appendSelection);
+            } else {
+                GameManagerComponent.Selection.SelectUnit(_lastSelectedDownPosition, appendSelection);
             }
 
             // End selecting
             _selectionComponent.EndSelect();
-            return;
         }
+    }
 
+    private void ManageGroups() {
         var assignGroup = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.LeftAlt);
         var mergeGroup = Input.GetKey(KeyCode.LeftShift);
 
@@ -91,11 +102,9 @@ public class InputReciever : MonoBehaviour {
             if (Input.GetKeyDown(code)) {
                 if (assignGroup) {
                     GameManagerComponent.Selection.AssignGroup(index);
-                }
-                else if (mergeGroup) {
+                } else if (mergeGroup) {
                     GameManagerComponent.Selection.MergeGroup(index);
-                }
-                else {
+                } else {
                     GameManagerComponent.Selection.SelectGroup(index);
                 }
             }

@@ -39,7 +39,7 @@ public class SelectionComponent : MonoBehaviour {
 
     private void DrawSelectionRect(Vector3 startScreen, Vector3 endScreen) {
         var startWorld = _selectionVisualCamera.ScreenToWorldPoint(startScreen);
-        var endWorld = _selectionVisualCamera.ScreenToWorldPoint(endScreen);
+        var endWorld   = _selectionVisualCamera.ScreenToWorldPoint(endScreen);
 
         var dx = endWorld.x - startWorld.x;
         var dy = endWorld.y - startWorld.y;

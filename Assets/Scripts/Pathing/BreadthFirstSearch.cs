@@ -82,7 +82,6 @@ public class BreadthFirstSearch {
                 }
             }
 
-
             hitNode.Parent = null;
             hitNode.GCost = 0;
             hitNode.HCost = 0;

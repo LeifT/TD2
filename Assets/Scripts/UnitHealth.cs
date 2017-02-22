@@ -1,19 +1,12 @@
-﻿using System;
-using UnityEngine;
-using System.Collections;
+﻿using UnityEngine;
 
 public class UnitHealth : MonoBehaviour {
-
     public delegate void HealthDecresed(int current, int max);
-    public event HealthDecresed OnHealthDecresed;
+    public event HealthDecresed OnHealthChanged;
 
-
-    void Start () {
-	    Health = MaxHealth;
-        
+    void OnEnable() {
+        Health = MaxHealth;
     }
-
-
 
     public int Health { get; private set; }
     public int MaxHealth;
@@ -29,14 +22,10 @@ public class UnitHealth : MonoBehaviour {
             Health = 0;
         }
 
-        if (OnHealthDecresed != null) {
-            OnHealthDecresed(Health, MaxHealth);
+        if (OnHealthChanged != null) {
+            OnHealthChanged(Health, MaxHealth);
         }
 
         return true;
-    }
-
-    void Update() {
-        TakeDamage(1);
     }
 }

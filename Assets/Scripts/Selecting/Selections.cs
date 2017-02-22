@@ -1,14 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using Assets.Scripts.Message;
 using UnityEngine;
 
 // ReSharper disable once CheckNamespace
 public class Selections {
     private static readonly List<IUnitFacade> EmptyGroup = new EmptyUnitGroup();
+
     private readonly IDictionary<int, List<IUnitFacade>> _groups;
-    private IUnitFacade _selectedUnitType;
+    private readonly IDictionary<int, List<IUnitFacade>> _types;
+
+    //private IUnitFacade _selectedUnitType;
 
     public Selections() {
         Selected = EmptyGroup;
@@ -28,13 +29,14 @@ public class Selections {
         SelectableUnits.Remove(unitFacade);
         Selected.Remove(unitFacade);
 
+        // Remove the unit from every group
         if (_groups.Count > 0) {
             foreach (var group in _groups) {
                 group.Value.Remove(unitFacade);
             }
         }
 
-        GameManagerComponent.MessageBus.Post(new UnitRemovedMessage(unitFacade));
+        //GameManagerComponent.MessageBus.Post(new UnitRemovedMessage(unitFacade));
     }
 
     private bool PositionWithinVectors(Vector3 position, Vector3 start, Vector3 end) {
@@ -57,21 +59,17 @@ public class Selections {
 
     public void SelectUnitsBetween(Vector3 start, Vector3 end, bool append) {
         start = Camera.main.WorldToScreenPoint(start);
-        
        
         List<IUnitFacade> units = new List<IUnitFacade>();
         int maxGroup = int.MinValue;
 
         foreach (var selectableUnit in SelectableUnits) {
             if (PositionWithinVectors(selectableUnit.Transform.localPosition, start, end)) {
-
                 if (selectableUnit.Group >= maxGroup) {
-
                     if (selectableUnit.Group > maxGroup) {
                         maxGroup = selectableUnit.Group;
                         units.Clear();
                     }
-
                     
                     units.Add(selectableUnit);
                 }
@@ -83,7 +81,7 @@ public class Selections {
         Select(units, append);
 
         if (units.Count > 0) {
-            PostUnitSelectTypeMessage(units[0]);
+            PostUnitSelectTypeMessage(GetHighest());
         }
     }
 
@@ -92,30 +90,35 @@ public class Selections {
         unit.IsSelected = true;
         Selected = new List<IUnitFacade> { unit };
         PostUnitSeletedMessage(Selected);
+        
+        // TODO: Improvement
+        // If unit is allready in group, deselect all except that unit
+        // Else deslect all and select that unit
     }
     
-    public void Select(int index, bool append) {
-        if (index < 0 || index >= SelectableUnits.Count) {
-            return;
-        }
+    //public void Select(int index, bool append) {
+    //    if (index < 0 || index >= SelectableUnits.Count) {
+    //        return;
+    //    }
 
-        var unit = SelectableUnits[index];
+    //    var unit = SelectableUnits[index];
 
-        DeselectAll();
+    //    DeselectAll();
 
-        Selected = new List<IUnitFacade> { unit };
-        PostUnitSeletedMessage(Selected);
-        //if (unit != null && unit.IsSelectable) {
-        //    ToggleSelected(unit, append);
-        //}
-        //else if (!append) {
-        //    DeselectAll();
-        //}
+    //    Selected = new List<IUnitFacade> { unit };
+    //    PostUnitSeletedMessage(Selected);
+    //    //if (unit != null && unit.IsSelectable) {
+    //    //    ToggleSelected(unit, append);
+    //    //}
+    //    //else if (!append) {
+    //    //    DeselectAll();
+    //    //}
 
-        //return unit;
-    }
+    //    //return unit;
+    //}
 
     // Get unit from screen position
+
     public void SelectUnit(Vector3 screenPos, bool append) {
         screenPos = Camera.main.WorldToScreenPoint(screenPos);
 
@@ -130,8 +133,7 @@ public class Selections {
 
         if (unit != null && unit.IsSelectable) {
             ToggleSelected(unit, append);
-        }
-        else if (!append) {
+        } else if (!append) {
             DeselectAll();
         }
 
@@ -222,9 +224,9 @@ public class Selections {
         PostUnitSeletedMessage(Selected);
     }
 
-    public void Select(bool append, params IUnitFacade[] unitsFacade) {
-        Select(unitsFacade.ToList(), append);
-    }
+    //public void Select(bool append, params IUnitFacade[] unitsFacade) {
+    //    Select(unitsFacade.ToList(), append);
+    //}
 
     public void DeselectAll() {
         foreach (var selectableUnit in Selected) {
@@ -251,6 +253,7 @@ public class Selections {
 
     public void MergeGroup(int groupIndex) {
         List<IUnitFacade> group;
+
         if (_groups.TryGetValue(groupIndex, out group)) {
             foreach (var selectableUnit in Selected) {
                 if (group.Contains(selectableUnit)) {
@@ -267,6 +270,12 @@ public class Selections {
     public void SelectGroup(int groupIndex) {
         List<IUnitFacade> group;
         if (_groups.TryGetValue(groupIndex, out group)) {
+            // Do nothing if the group is empty
+            if (group.Count == 0) {
+                return;
+            }
+            
+            // Deselct the selected units that are not in this group
             foreach (var selectableUnit in Selected) {
                 if (group.Contains(selectableUnit)) {
                     continue;
@@ -274,6 +283,7 @@ public class Selections {
                 selectableUnit.IsSelected = false;
             }
 
+            // Select the remaining units from the group
             foreach (var selectableUnit in group) {
                 if (Selected.Contains(selectableUnit)) {
                     continue;
@@ -286,7 +296,26 @@ public class Selections {
             foreach (var selectableUnit in group) {
                 Selected.Add(selectableUnit);
             }
+
+            PostUnitSeletedMessage(Selected);
         }
+    }
+
+    public IUnitFacade GetHighest()
+    {
+        var max = int.MinValue;
+        var index = 0;
+
+        for (int i = 0; i < Selected.Count; i++)
+        {
+            if (Selected[i].Priority > max)
+            {
+                max = Selected[i].Priority;
+                index = i;
+            }
+        }
+
+        return Selected[index];
     }
 
     private void PostUnitSeletedMessage(List<IUnitFacade> units) {
