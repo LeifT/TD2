@@ -19,17 +19,14 @@ public class PlaceTower : MonoBehaviour {
     // ReSharper disable once UnusedMember.Local
     private void Update() {
         if (Input.GetKeyDown(KeyCode.Alpha1)) {
-            Debug.Log("Selected tower 1");
             SelectedTower = Tower1;
         }
 
         if (Input.GetKeyDown(KeyCode.Alpha2)) {
-            Debug.Log("Selected tower 2");
             SelectedTower = Tower2;
         }
 
         if (Input.GetKeyDown(KeyCode.Alpha3)) {
-            Debug.Log("Selected tower 3");
             SelectedTower = Tower3;
         }
 

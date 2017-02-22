@@ -1,18 +1,12 @@
 ﻿using System.Collections.Generic;
 
-// ReSharper disable once CheckNamespace
-public class UnitsSelectedMessage
-{
+public class UnitsSelectedMessage {
 
-    public UnitsSelectedMessage(List<IUnitFacade> units)
-    {
-        //Ensure.ArgumentNotNull(Slots, "Slots");
+    public UnitsSelectedMessage(List<IUnitFacade> units) {
         SelectedUnits = units;
     }
 
-
-    public List<IUnitFacade> SelectedUnits
-    {
+    public List<IUnitFacade> SelectedUnits {
         get;
         private set;
     }
