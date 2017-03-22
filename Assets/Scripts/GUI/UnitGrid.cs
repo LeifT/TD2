@@ -16,12 +16,12 @@ public class UnitGrid : MonoBehaviour, IMessage<SelectionChangedMessage> {
     private void OnDisable() {
         GameManagerComponent.MessageBus.Unsubscribe(this);
     }
-    
+
     public void Handle(SelectionChangedMessage message) {
         foreach (var unitFacade in message.Removed) {
             Destroy(_units[unitFacade]);
             _units.Remove(unitFacade);
-            
+
         }
 
         message.Added.Sort((unit1, unit2) => unit2.Priority.CompareTo(unit1.Priority));
@@ -33,6 +33,14 @@ public class UnitGrid : MonoBehaviour, IMessage<SelectionChangedMessage> {
 
             unit.transform.GetChild(0).GetComponent<Image>().sprite = message.Added[i].Icon;
             _units.Add(unit.UnitFacade, unit.gameObject);
+        }
+
+        foreach (var unit in _units) {
+            unit.Value.GetComponent<Image>().enabled = false;
+        }
+
+        foreach (var unitFacade in message.Type) {
+            _units[unitFacade].GetComponent<Image>().enabled = true;
         }
     }
 }

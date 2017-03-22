@@ -19,7 +19,6 @@ public class InputReciever : MonoBehaviour {
         Selection();
 
         if (Input.GetKeyDown(KeyCode.Tab)) {
-            Debug.Log("Pressed TAB");
             return;
         }
 

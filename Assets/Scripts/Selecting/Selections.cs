@@ -33,7 +33,7 @@ public class Selections {
         if (Selected.Contains(unitFacade)) {
             var removed = new List<IUnitFacade>();
             RemoveUnit(unitFacade, removed);
-            PostSelectionChangedMessage(Selected, new List<IUnitFacade>(), removed);
+            PostSelectionChangedMessage(Selected, new List<IUnitFacade>(), removed, _types[Selected[0].Priority]);
         }
     }
 
@@ -86,7 +86,7 @@ public class Selections {
         var added = new List<IUnitFacade>();
         var removed = new List<IUnitFacade>();
 
-        //// Remove every other unit in the selection
+        // Remove every other unit in the selection
         if (Selected.Contains(unit)) {
             for (var i = Selected.Count - 1; i >= 0; i--) {
                 if (!Selected[i].Equals(unit)) {
@@ -98,7 +98,7 @@ public class Selections {
             AddUnit(unit, added);
         }
 
-        PostSelectionChangedMessage(Selected, added, removed);
+        PostSelectionChangedMessage(Selected, added, removed, _types[Selected[0].Priority]);
     }
 
     private void ClearSelection(List<IUnitFacade> removed) {
@@ -132,7 +132,7 @@ public class Selections {
             ClearSelection(removed);
         }
 
-        PostSelectionChangedMessage(Selected, added, removed);
+        PostSelectionChangedMessage(Selected, added, removed, _types[Selected[0].Priority]);
     }
 
     public void ToggleSelected(IUnitFacade unitFacade) {
@@ -145,7 +145,7 @@ public class Selections {
             AddUnit(unitFacade, added);
         }
 
-        PostSelectionChangedMessage(Selected, added, removed);
+        PostSelectionChangedMessage(Selected, added, removed, _types[Selected[0].Priority]);
     }
 
     public void AddUnit(IUnitFacade unit, List<IUnitFacade> list) {
@@ -190,7 +190,7 @@ public class Selections {
             }
         }
 
-        PostSelectionChangedMessage(Selected, added, removed);
+        PostSelectionChangedMessage(Selected, added, removed, _types[GetHighest().Priority]);
     }
 
     public void AssignGroup(int groupIndex) {
@@ -246,7 +246,7 @@ public class Selections {
                 }
             }
 
-            PostSelectionChangedMessage(Selected, added, removed);
+            PostSelectionChangedMessage(Selected, added, removed, _types[GetHighest().Priority]);
         }
     }
 
@@ -264,7 +264,7 @@ public class Selections {
         return Selected[index];
     }
 
-    private void PostSelectionChangedMessage(List<IUnitFacade> units, List<IUnitFacade> added, List<IUnitFacade> removed) {
-        GameManagerComponent.MessageBus.Post(new SelectionChangedMessage(units, added, removed));
+    private void PostSelectionChangedMessage(List<IUnitFacade> units, List<IUnitFacade> added, List<IUnitFacade> removed, List<IUnitFacade> type) {
+        GameManagerComponent.MessageBus.Post(new SelectionChangedMessage(units, added, removed, type));
     }
 }
